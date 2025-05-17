@@ -131,7 +131,7 @@ def export_variables(workspace, repo_slug, deployment_name, output_file, auth):
     export_vars = []
     for var in variables:
         if not var["secured"]:
-            export_vars.append({"key": var["key"], "value": var["value"], "secured": False})
+            export_vars.append({"key": var["key"], "value": var["value"], "secured": var["secured"]})
         else:
             log.info("Secured variable '%s' will not be exported. Use --export-secret-keys for a list of secure keys.", var['key'])
     log.debug("Preparing to export %s variables", len(export_vars))
@@ -150,9 +150,9 @@ def export_all_variables(workspace, repo_slug, deployment_name, output_file, aut
     export_vars = []
     for var in variables:
         if var["secured"]:
-            export_vars.append({"key": var["key"], "value": "", "secured": True})
+            export_vars.append({"key": var["key"], "value": "", "secured": var["secured"]})
         else:
-            export_vars.append({"key": var["key"], "value": var["value"], "secured": False})
+            export_vars.append({"key": var["key"], "value": var["value"], "secured": var["secured"]})
     log.debug("Preparing to export %s variables", len(export_vars))
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(export_vars, f, indent=4)
@@ -181,7 +181,7 @@ def update_vars(workspace, repo_slug, environment_uuid, existing_vars, var, auth
         payload = {
             "key": var["key"],
             "value": var["value"],
-            "secured": False,
+            "secured": var["secured"],
             "environment": {
                 "type": "deployment_environment",
                 "uuid": environment_uuid
@@ -196,7 +196,7 @@ def update_vars(workspace, repo_slug, environment_uuid, existing_vars, var, auth
         payload = {
             "key": var["key"],
             "value": var["value"],
-            "secured": False,
+            "secured": var["secured"],
             "environment": {
                 "type": "deployment_environment",
                 "uuid": environment_uuid

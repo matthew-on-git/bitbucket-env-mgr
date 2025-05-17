@@ -7,6 +7,7 @@ import inspect
 import datetime
 
 class Logger:
+    """Build Logger"""
     def __init__(self, enable_log_file=False, log_level='INFO'):
         self.log_name = os.path.basename(inspect.stack()[1].filename)
         self.log_level = log_level
@@ -21,7 +22,8 @@ class Logger:
             formatter = logging.Formatter(fmt="[%(asctime)s] - [%(levelname)s] - [%(name)s.%(funcName)s:%(lineno)d] - [%(message)s]")
             file_handler = logging.FileHandler(
                 filename=f"{self.log_name}-{datestamp}.log",
-                mode="a")
+                mode="a"
+                )
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
 
