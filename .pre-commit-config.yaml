@@ -1,0 +1,8 @@
+repos:
+- repo: https://github.com/matthew-on-git/pre-commit-conventional-commits.git
+  rev: 747218c92008b8af09f278a11bcffb6d3d34a20f
+  hooks:
+    -
+      id: conventional-commit-check
+      stages:
+        - commit-msg

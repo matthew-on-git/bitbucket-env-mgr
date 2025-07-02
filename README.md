@@ -60,31 +60,31 @@ Mutually exclusive options (one required):
 #### Export Non-Secured Variables
 To export non-secured variables from the "development" environment to `variables.json`:
 ```
-./manage-bitbucket-env.py -w your_workspace -r your_repo -d development -o variables.json
+./manage_bitbucket_env.py -w your_workspace -r your_repo -d development -o variables.json
 ```
 
 #### Export All Variables
 To export all variables from the "development" environment to `all_variables.json`:
 ```
-./manage-bitbucket-env.py -w your_workspace -r your_repo -d development -a all_variables.json
+./manage_bitbucket_env.py -w your_workspace -r your_repo -d development -a all_variables.json
 ```
 
 #### Export Secured Variable Keys
 To export the keys of secured variables from the "development" environment to `secret_keys.json`:
 ```
-./manage-bitbucket-env.py -w your_workspace -r your_repo -d development -e secret_keys.json
+./manage_bitbucket_env.py -w your_workspace -r your_repo -d development -e secret_keys.json
 ```
 
 #### Import Non-Secured Variables
 To import non-secured variables from `variables.json` to the "development" environment:
 ```
-./manage-bitbucket-env.py -w your_workspace -r your_repo -d development -i variables.json
+./manage_bitbucket_env.py -w your_workspace -r your_repo -d development -i variables.json
 ```
 
 #### Import All Variables
 To import all variables from `all_variables.json` to the "development" environment:
 ```
-./manage-bitbucket-env.py -w your_workspace -r your_repo -d development --import-all all_variables.json
+./manage_bitbucket_env.py -w your_workspace -r your_repo -d development --import-all all_variables.json
 ```
 
 ## JSON File Formats
