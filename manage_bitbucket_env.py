@@ -19,7 +19,7 @@ from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
 
 # -- local ./helpers
-from helpers.logging import BitbucketLogger
+from helpers.bitbucket_logging import BitbucketLogger
 
 # pylint: disable=import-error
 
