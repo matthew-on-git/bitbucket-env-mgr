@@ -6,6 +6,8 @@ This module provides a custom Logger class that extends the standard logging.Log
 to provide colored console output and optional file logging capabilities.
 """
 
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+
 import datetime
 import inspect
 import logging
