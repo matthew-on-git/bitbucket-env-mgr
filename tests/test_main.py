@@ -1,3 +1,4 @@
+"""Unit tests for main function integration in manage_bitbucket_env.py."""
 import unittest
 from unittest.mock import patch, Mock
 import sys
@@ -6,7 +7,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from manage_bitbucket_env import main
 
 class TestMainFunction(unittest.TestCase):
+    """Test main function integration."""
+    mock_logger = None
+
     def setUp(self):
+        """Set up test fixtures."""
         self.mock_logger = Mock()
 
     @patch('manage_bitbucket_env.arg_parser')
@@ -14,7 +19,10 @@ class TestMainFunction(unittest.TestCase):
     @patch('os.environ.get')
     @patch('manage_bitbucket_env.HTTPBasicAuth')
     @patch('manage_bitbucket_env.export_variables')
-    def test_main_export_variables(self, mock_export, mock_auth, mock_env_get, mock_load_dotenv, mock_arg_parser):
+    # pylint: disable=too-many-arguments, too-many-positional-arguments
+    def test_main_export_variables(self, mock_export, mock_auth, mock_env_get,
+                                  mock_load_dotenv, mock_arg_parser):
+        """Test main function with export variables."""
         mock_args = Mock()
         mock_args.output = 'test_output.json'
         mock_args.workspace = 'test-workspace'
@@ -41,6 +49,7 @@ class TestMainFunction(unittest.TestCase):
     @patch('manage_bitbucket_env.load_dotenv')
     @patch('os.environ.get')
     def test_main_missing_credentials(self, mock_env_get, mock_load_dotenv, mock_arg_parser):
+        """Test main function with missing credentials."""
         mock_args = Mock()
         mock_args.output = 'test_output.json'
         mock_arg_parser.return_value = mock_args

@@ -1,3 +1,4 @@
+"""Unit tests for argument parsing in manage_bitbucket_env.py."""
 import unittest
 from unittest.mock import patch
 import sys
@@ -6,7 +7,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from manage_bitbucket_env import arg_parser
 
 class TestArgParser(unittest.TestCase):
+    """Test argument parsing functionality."""
+
     def test_export_args(self):
+        """Test parsing arguments for exporting variables."""
         test_args = [
             'prog', '-w', 'ws', '-r', 'repo', '-d', 'env', '-o', 'out.json'
         ]
@@ -18,6 +22,7 @@ class TestArgParser(unittest.TestCase):
             self.assertEqual(args.output, 'out.json')
 
     def test_import_args(self):
+        """Test parsing arguments for importing variables."""
         test_args = [
             'prog', '-w', 'ws', '-r', 'repo', '-d', 'env', '-i', 'in.json'
         ]
@@ -26,6 +31,7 @@ class TestArgParser(unittest.TestCase):
             self.assertEqual(args.import_file, 'in.json')
 
     def test_mutually_exclusive(self):
+        """Test that mutually exclusive arguments raise an error."""
         test_args = [
             'prog', '-w', 'ws', '-r', 'repo', '-d', 'env'
         ]
