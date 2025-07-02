@@ -14,7 +14,7 @@ import os
 import coloredlogs  # type: ignore
 
 
-class Logger(logging.Logger):
+class BitbucketLogger(logging.Logger):
     """Build Logger"""
     def __init__(
         self,

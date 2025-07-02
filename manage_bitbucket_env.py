@@ -11,15 +11,27 @@ import argparse
 import json
 import os
 import sys
-from typing import cast, Union
+from typing import cast, Union, Any
+from dataclasses import dataclass
 
 import requests
 from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
 
 # -- local ./helpers
-from helpers.logging import Logger
+from helpers.logging import BitbucketLogger
 
+# pylint: disable=import-error
+
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+@dataclass
+class BitbucketConfig:
+    """Configuration class for Bitbucket API operations."""
+    workspace: str
+    repo_slug: str
+    deployment_name: str
+    auth: HTTPBasicAuth
+    logger: Any
 
 def arg_parser() -> argparse.Namespace:
     """Parse arguments and execute export or import functionality."""
@@ -96,7 +108,7 @@ def get_environment_uuid(
     repo_slug: str,
     deployment_name: str,
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ) -> str:
     """Retrieve the UUID of the specified deployment environment."""
     logger.debug("Fetching environments for workspace %s, repo %s", workspace, repo_slug)
@@ -119,7 +131,7 @@ def get_variables(
     repo_slug: str,
     environment_uuid: str,
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ) -> list[dict[str, object]]:
     """Fetch all environment variables for the given environment UUID."""
     logger.debug(
@@ -156,7 +168,7 @@ def export_variables(
     deployment_name: str,
     output_file: str,
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ):
     """Export non-secured environment variables to a JSON file."""
     logger.info("Exporting non-secured variables numbering to %s", output_file)
@@ -178,11 +190,18 @@ def export_variables(
                 "Use --export-secret-keys for a list of secure keys.",
                 var['key']
             )
-    logger.debug("Preparing to export %s variables", len(export_vars))
+    logger.debug(
+        "Preparing to export %s variables",
+        len(export_vars)
+    )
     count = len(export_vars)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(export_vars, f, indent=4)
-    logger.info("Non-secured variables(%s) exported to %s", count, output_file)
+    logger.info(
+        "Non-secured variables(%s) exported to %s",
+        count,
+        output_file
+    )
 
 
 def export_all_variables(
@@ -191,7 +210,7 @@ def export_all_variables(
     deployment_name: str,
     output_file: str,
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ):
     """Export all environment variables to a JSON file."""
     logger.info("Exporting all variables to %s", output_file)
@@ -216,7 +235,11 @@ def export_all_variables(
     logger.debug("Preparing to export %s variables", len(export_vars))
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(export_vars, f, indent=4)
-    logger.info("All variables for %s exported to %s", deployment_name, output_file)
+    logger.info(
+        "All variables for %s exported to %s",
+        deployment_name,
+        output_file
+    )
 
 
 def export_secret_keys(
@@ -225,20 +248,42 @@ def export_secret_keys(
     deployment_name: str,
     output_file: str,
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ):
     """Export keys of secured environment variables to a JSON file."""
-    logger.info("Exporting secured variable keys to %s", output_file)
-    environment_uuid = get_environment_uuid(workspace, repo_slug, deployment_name, auth, logger)
-    variables = get_variables(workspace, repo_slug, environment_uuid, auth, logger)
+    logger.info(
+        "Exporting secured variable keys to %s",
+        output_file
+    )
+    environment_uuid = get_environment_uuid(
+        workspace,
+        repo_slug,
+        deployment_name,
+        auth,
+        logger
+    )
+    variables = get_variables(
+        workspace,
+        repo_slug,
+        environment_uuid,
+        auth,
+        logger
+    )
     if not variables:
         return
     secret_keys = [var["key"] for var in variables if var["secured"]]
-    logger.debug("Preparing to export %s secured variable keys", len(secret_keys))
+    logger.debug(
+        "Preparing to export %s secured variable keys",
+        len(secret_keys)
+    )
     count = len(secret_keys)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(secret_keys, f, indent=4)
-    logger.info("Secured variable keys(%s) exported to %s", count, output_file)
+    logger.info(
+        "Secured variable keys(%s) exported to %s",
+        count,
+        output_file
+    )
 
 
 def update_vars(
@@ -248,14 +293,14 @@ def update_vars(
     existing_vars: list[dict[str, object]],
     var: dict[str, object],
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ):
     """Function that actually calls the api to update args"""
     existing_var = next((v for v in existing_vars if v["key"] == var["key"]), None)
     if existing_var:
         logger.debug("Variable '%s' exists, updating", var['key'])
         url = (f"https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/"
-               f"deployments_config/environments/{environment_uuid}/variables/{existing_var['uuid']}")
+            f"deployments_config/environments/{environment_uuid}/variables/{existing_var['uuid']}")
         payload = {
             "key": var["key"],
             "value": var["value"],
@@ -293,7 +338,7 @@ def import_variables(
     input_file: str,
     update_all: bool,
     auth: HTTPBasicAuth,
-    logger
+    logger: Any
 ):
     """Import variables from a JSON file into Bitbucket."""
     logger.info("Importing variables from %s", input_file)
@@ -330,80 +375,80 @@ def import_variables(
     logger.info("Variable import completed")
 
 
-def main():
+def main(logger: Any):
     """Main function to handle the application logic."""
-    parsed_args: argparse.Namespace = arg_parser()
-    log.info("Starting Bitbucket environment variable manager")
-    log.debug("Command-line arguments: %s", vars(parsed_args))
+    main_args: argparse.Namespace = arg_parser()
+    logger.info("Starting Bitbucket environment variable manager")
+    logger.debug("Command-line arguments: %s", vars(main_args))
 
     # Load credentials
-    log.debug("Loading credentials from bitbucket.env")
+    logger.debug("Loading credentials from bitbucket.env")
     _ = load_dotenv('bitbucket.env')
     username = os.environ.get("BITBUCKET_USERNAME")
     app_password = os.environ.get("BITBUCKET_APP_PASSWORD")
     if not username or not app_password:
-        log.error("BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD must be set in bitbucket.env")
+        logger.error("BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD must be set in bitbucket.env")
         sys.exit(1)
     auth = HTTPBasicAuth(username, app_password)
-    log.debug("Authentication credentials loaded successfully")
+    logger.debug("Authentication credentials loaded successfully")
 
     try:
-        if parsed_args.output:
+        if main_args.output:
             export_variables(
-                workspace=parsed_args.workspace,
-                repo_slug=parsed_args.repo_slug,
-                deployment_name=parsed_args.deployment_name,
-                output_file=parsed_args.output,
+                workspace=main_args.workspace,
+                repo_slug=main_args.repo_slug,
+                deployment_name=main_args.deployment_name,
+                output_file=main_args.output,
                 auth=auth,
-                logger=log
+                logger=logger
             )
-        elif parsed_args.all_vars_output:
+        elif main_args.all_vars_output:
             export_all_variables(
-                workspace=parsed_args.workspace,
-                repo_slug=parsed_args.repo_slug,
-                deployment_name=parsed_args.deployment_name,
-                output_file=parsed_args.all_vars_output,
+                workspace=main_args.workspace,
+                repo_slug=main_args.repo_slug,
+                deployment_name=main_args.deployment_name,
+                output_file=main_args.all_vars_output,
                 auth=auth,
-                logger=log
+                logger=logger
             )
-        elif parsed_args.export_secret_keys:
+        elif main_args.export_secret_keys:
             export_secret_keys(
-                workspace=parsed_args.workspace,
-                repo_slug=parsed_args.repo_slug,
-                deployment_name=parsed_args.deployment_name,
-                output_file=parsed_args.export_secret_keys,
+                workspace=main_args.workspace,
+                repo_slug=main_args.repo_slug,
+                deployment_name=main_args.deployment_name,
+                output_file=main_args.export_secret_keys,
                 auth=auth,
-                logger=log
+                logger=logger
             )
-        elif parsed_args.import_file:
+        elif main_args.import_file:
             import_variables(
-                workspace=parsed_args.workspace,
-                repo_slug=parsed_args.repo_slug,
-                deployment_name=parsed_args.deployment_name,
-                input_file=parsed_args.import_file,
+                workspace=main_args.workspace,
+                repo_slug=main_args.repo_slug,
+                deployment_name=main_args.deployment_name,
+                input_file=main_args.import_file,
                 auth=auth,
                 update_all=False,
-                logger=log
+                logger=logger
             )
-        elif parsed_args.import_all:
+        elif main_args.import_all:
             import_variables(
-                workspace=parsed_args.workspace,
-                repo_slug=parsed_args.repo_slug,
-                deployment_name=parsed_args.deployment_name,
-                input_file=parsed_args.import_all,
+                workspace=main_args.workspace,
+                repo_slug=main_args.repo_slug,
+                deployment_name=main_args.deployment_name,
+                input_file=main_args.import_all,
                 auth=auth,
                 update_all=True,
-                logger=log
+                logger=logger
             )
-        log.info("Operation completed successfully")
+        logger.info("Operation completed successfully")
     except requests.RequestException as e:
-        log.error("API error: %s", e)
+        logger.error("API error: %s", e)
         sys.exit(1)
     except ValueError as e:
-        log.error("Error: %s", e)
+        logger.error("Error: %s", e)
         sys.exit(1)
     except FileNotFoundError as e:
-        log.error("File error: %s", e)
+        logger.error("File error: %s", e)
         sys.exit(1)
 
 
@@ -412,6 +457,6 @@ if __name__ == "__main__":
     # Configure logging
     LEVEL = 'DEBUG' if parsed_args.verbose else 'INFO'
     WRITE_LOG = parsed_args.logfile
-    log = Logger(enable_log_file=WRITE_LOG, log_level=LEVEL).create_logger()
+    log = BitbucketLogger(enable_log_file=WRITE_LOG, log_level=LEVEL).create_logger()
     # Main
-    main()
+    main(log)
