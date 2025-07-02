@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
-import coloredlogs
+
+import coloredlogs  # type: ignore
 import logging
-import sys
 import os
 import inspect
 import datetime
 
-class Logger:
+class Logger(logging.Logger):
     """Build Logger"""
-    def __init__(self, enable_log_file=False, log_level='INFO'):
-        self.log_name = os.path.basename(inspect.stack()[1].filename)
-        self.log_level = log_level
-        self.enable_log_file = enable_log_file
+    def __init__(
+        self, 
+        enable_log_file: bool = False,
+        log_level: str = 'INFO'
+    ):
+        super().__init__(os.path.basename(inspect.stack()[1].filename))
+        self.log_name: str = os.path.basename(inspect.stack()[1].filename)
+        self.log_level: str = log_level
+        self.enable_log_file: bool = enable_log_file
 
-    def __logging(self):
+    def __logging(self) -> logging.Logger:
         datestamp = datetime.datetime.today().strftime("%m-%d-%Y")
         logger = logging.getLogger(self.log_name)
         logging.captureWarnings(True)
-        coloredlogs.install(level=self.log_level)
+        coloredlogs.install(level=self.log_level)  # type: ignore
         if self.enable_log_file:
             formatter = logging.Formatter(fmt="[%(asctime)s] - [%(levelname)s] - [%(name)s.%(funcName)s:%(lineno)d] - [%(message)s]")
             file_handler = logging.FileHandler(
@@ -29,5 +34,5 @@ class Logger:
 
         return logger
 
-    def create_logger(self):
+    def create_logger(self) -> logging.Logger:
         return self.__logging()
