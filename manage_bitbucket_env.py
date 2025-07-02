@@ -25,7 +25,7 @@ from helpers.bitbucket_logging import BitbucketLogger
 
 # pylint: disable=import-error
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-positional-arguments
 @dataclass
 class BitbucketConfig:
     """Configuration class for Bitbucket API operations."""
