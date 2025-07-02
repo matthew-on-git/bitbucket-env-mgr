@@ -7,11 +7,13 @@ for Bitbucket deployment environments. It supports both secured and non-secured
 variables and can handle bulk operations through JSON files.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os
 import sys
-from typing import cast, Union, Any
+from typing import cast, Union, Any, List, Dict
 from dataclasses import dataclass
 
 import requests
@@ -115,7 +117,7 @@ def get_environment_uuid(
     url = f"https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/environments"
     response = requests.get(url, auth=auth, timeout=30)
     response.raise_for_status()
-    environments = cast(list[dict[str, object]], response.json()["values"])
+    environments = cast(List[Dict[str, object]], response.json()["values"])
     logger.debug("Received %s environments", len(environments))
     for env in environments:
         logger.debug("Checking environment: %s", env['name'])
@@ -132,7 +134,7 @@ def get_variables(
     environment_uuid: str,
     auth: HTTPBasicAuth,
     logger: Any
-) -> list[dict[str, object]]:
+) -> List[Dict[str, object]]:
     """Fetch all environment variables for the given environment UUID."""
     logger.debug(
         "Fetching variables for repository %s/%s, environment %s",
@@ -140,13 +142,13 @@ def get_variables(
     )
     url = (f"https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/"
            f"deployments_config/environments/{environment_uuid}/variables?pagelen=1")
-    all_variables: list[dict[str, object]] = []
+    all_variables: List[Dict[str, object]] = []
     while url:
         logger.debug("Requesting %s", url)
         response = requests.get(url, auth=auth, timeout=30)
         response.raise_for_status()
-        data = cast(dict[str, object], response.json())
-        variables = cast(list[dict[str, object]], data.get("values", []))
+        data = cast(Dict[str, object], response.json())
+        variables = cast(List[Dict[str, object]], data.get("values", []))
         if not variables:
             logger.info("No variables configured for %s", environment_uuid)
             return all_variables
@@ -176,7 +178,7 @@ def export_variables(
     variables = get_variables(workspace, repo_slug, environment_uuid, auth, logger)
     if not variables:
         return
-    export_vars: list[dict[str, object]] = []
+    export_vars: List[Dict[str, object]] = []
     for var in variables:
         if not var["secured"]:
             export_vars.append({
@@ -218,7 +220,7 @@ def export_all_variables(
     variables = get_variables(workspace, repo_slug, environment_uuid, auth, logger)
     if not variables:
         return
-    export_vars: list[dict[str, object]] = []
+    export_vars: List[Dict[str, object]] = []
     for var in variables:
         if var["secured"]:
             export_vars.append({
@@ -290,8 +292,8 @@ def update_vars(
     workspace: str,
     repo_slug: str,
     environment_uuid: str,
-    existing_vars: list[dict[str, object]],
-    var: dict[str, object],
+    existing_vars: List[Dict[str, object]],
+    var: Dict[str, object],
     auth: HTTPBasicAuth,
     logger: Any
 ):
@@ -345,7 +347,7 @@ def import_variables(
     environment_uuid = get_environment_uuid(workspace, repo_slug, deployment_name, auth, logger)
     existing_vars = get_variables(workspace, repo_slug, environment_uuid, auth, logger)
     with open(input_file, "r", encoding="utf-8") as f:
-        import_vars = cast(list[dict[str, object]], json.load(f))
+        import_vars = cast(List[Dict[str, object]], json.load(f))
     logger.debug("Loaded %s variables from %s", len(import_vars), input_file)
     if update_all:
         for var in import_vars:
