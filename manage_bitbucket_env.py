@@ -87,7 +87,7 @@ def arg_parser() -> argparse.Namespace:
     )
     _ = group.add_argument(
         "-e",
-        "--export-secret-keys",
+        "--export-secure-keys",
         help="Output JSON file for exporting secured variable keys"
     )
     _ = group.add_argument(
@@ -99,7 +99,7 @@ def arg_parser() -> argparse.Namespace:
     _ = group.add_argument(
         "--import-all",
         dest="import_all",
-        help="Input JSON file for importing all variables, including secret keys"
+        help="Input JSON file for importing all variables, including secure keys"
     )
 
     return parser.parse_args()
@@ -189,7 +189,7 @@ def export_variables(
         else:
             logger.info(
                 "Secured variable '%s' will not be exported. "
-                "Use --export-secret-keys for a list of secure keys.",
+                "Use --export-secure-keys for a list of secure keys.",
                 var['key']
             )
     logger.debug(
@@ -244,7 +244,7 @@ def export_all_variables(
     )
 
 
-def export_secret_keys(
+def export_secure_keys(
     workspace: str,
     repo_slug: str,
     deployment_name: str,
@@ -273,14 +273,14 @@ def export_secret_keys(
     )
     if not variables:
         return
-    secret_keys = [var["key"] for var in variables if var["secured"]]
+    secure_keys = [var["key"] for var in variables if var["secured"]]
     logger.debug(
         "Preparing to export %s secured variable keys",
-        len(secret_keys)
+        len(secure_keys)
     )
-    count = len(secret_keys)
+    count = len(secure_keys)
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(secret_keys, f, indent=4)
+        json.dump(secure_keys, f, indent=4)
     logger.info(
         "Secured variable keys(%s) exported to %s",
         count,
@@ -413,12 +413,12 @@ def main(logger: Any):
                 auth=auth,
                 logger=logger
             )
-        elif main_args.export_secret_keys:
-            export_secret_keys(
+        elif main_args.export_secure_keys:
+            export_secure_keys(
                 workspace=main_args.workspace,
                 repo_slug=main_args.repo_slug,
                 deployment_name=main_args.deployment_name,
-                output_file=main_args.export_secret_keys,
+                output_file=main_args.export_secure_keys,
                 auth=auth,
                 logger=logger
             )
