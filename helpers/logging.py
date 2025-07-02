@@ -26,7 +26,7 @@ class Logger(logging.Logger):
         self.log_level: str = log_level
         self.enable_log_file: bool = enable_log_file
 
-    def __logging(self) -> logging.Logger:
+    def _setup_logging(self) -> logging.Logger:
         """Create and configure the logger instance."""
         datestamp = datetime.datetime.today().strftime("%m-%d-%Y")
         logger = logging.getLogger(self.log_name)
@@ -34,7 +34,8 @@ class Logger(logging.Logger):
         coloredlogs.install(level=self.log_level)  # type: ignore
         if self.enable_log_file:
             formatter = logging.Formatter(
-                fmt="[%(asctime)s] - [%(levelname)s] - [%(name)s.%(funcName)s:%(lineno)d] - [%(message)s]"
+                fmt=("[%(asctime)s] - [%(levelname)s] - "
+                     "[%(name)s.%(funcName)s:%(lineno)d] - [%(message)s]")
             )
             file_handler = logging.FileHandler(
                 filename=f"{self.log_name}-{datestamp}.log",
@@ -47,4 +48,8 @@ class Logger(logging.Logger):
 
     def create_logger(self) -> logging.Logger:
         """Create and return a configured logger instance."""
-        return self.__logging()
+        return self._setup_logging()
+
+    def get_log_name(self) -> str:
+        """Get the log name."""
+        return self.log_name
