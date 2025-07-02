@@ -1,0 +1,105 @@
+import unittest
+from unittest.mock import patch, Mock
+import sys
+import os
+import tempfile
+import json
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from manage_bitbucket_env import export_variables, export_all_variables, export_secure_keys, import_variables
+
+class TestExportImport(unittest.TestCase):
+    def setUp(self):
+        self.logger = Mock()
+        self.auth = Mock()
+        self.workspace = 'ws'
+        self.repo_slug = 'repo'
+        self.deployment_name = 'env'
+        self.env_uuid = 'uuid-123'
+
+    @patch('manage_bitbucket_env.get_environment_uuid')
+    @patch('manage_bitbucket_env.get_variables')
+    def test_export_variables(self, mock_get_vars, mock_get_uuid):
+        mock_get_uuid.return_value = self.env_uuid
+        mock_get_vars.return_value = [
+            {"key": "A", "value": "1", "secured": False},
+            {"key": "B", "value": "2", "secured": True}
+        ]
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            fname = tf.name
+        try:
+            export_variables(self.workspace, self.repo_slug, self.deployment_name, fname, self.auth, self.logger)
+            with open(fname) as f:
+                data = json.load(f)
+            self.assertEqual(len(data), 1)
+            self.assertEqual(data[0]["key"], "A")
+        finally:
+            os.unlink(fname)
+
+    @patch('manage_bitbucket_env.get_environment_uuid')
+    @patch('manage_bitbucket_env.get_variables')
+    def test_export_all_variables(self, mock_get_vars, mock_get_uuid):
+        mock_get_uuid.return_value = self.env_uuid
+        mock_get_vars.return_value = [
+            {"key": "A", "value": "1", "secured": False},
+            {"key": "B", "value": "2", "secured": True}
+        ]
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            fname = tf.name
+        try:
+            export_all_variables(self.workspace, self.repo_slug, self.deployment_name, fname, self.auth, self.logger)
+            with open(fname) as f:
+                data = json.load(f)
+            self.assertEqual(len(data), 2)
+            test_var = next(v for v in data if v["key"] == "A")
+            self.assertEqual(test_var["value"], "1")
+            self.assertFalse(test_var["secured"])
+            secure_var = next(v for v in data if v["key"] == "B")
+            self.assertEqual(secure_var["value"], "")
+            self.assertTrue(secure_var["secured"])
+        finally:
+            os.unlink(fname)
+
+    @patch('manage_bitbucket_env.get_environment_uuid')
+    @patch('manage_bitbucket_env.get_variables')
+    def test_export_secure_keys(self, mock_get_vars, mock_get_uuid):
+        mock_get_uuid.return_value = self.env_uuid
+        mock_get_vars.return_value = [
+            {"key": "A", "secured": False},
+            {"key": "B", "secured": True},
+            {"key": "C", "secured": True}
+        ]
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            fname = tf.name
+        try:
+            export_secure_keys(self.workspace, self.repo_slug, self.deployment_name, fname, self.auth, self.logger)
+            with open(fname) as f:
+                data = json.load(f)
+            self.assertIn("B", data)
+            self.assertIn("C", data)
+            self.assertNotIn("A", data)
+        finally:
+            os.unlink(fname)
+
+    @patch('manage_bitbucket_env.get_environment_uuid')
+    @patch('manage_bitbucket_env.get_variables')
+    @patch('manage_bitbucket_env.update_vars')
+    def test_import_variables(self, mock_update, mock_get_vars, mock_get_uuid):
+        mock_get_uuid.return_value = self.env_uuid
+        mock_get_vars.return_value = []
+        test_vars = [
+            {"key": "A", "value": "1", "secured": False},
+            {"key": "B", "value": "2", "secured": True}
+        ]
+        with tempfile.NamedTemporaryFile(delete=False, mode='w') as tf:
+            json.dump(test_vars, tf)
+            fname = tf.name
+        try:
+            import_variables(self.workspace, self.repo_slug, self.deployment_name, fname, False, self.auth, self.logger)
+            self.assertEqual(mock_update.call_count, 1)
+            call_args = mock_update.call_args[1]
+            self.assertEqual(call_args['var']["key"], "A")
+        finally:
+            os.unlink(fname)
+
+if __name__ == '__main__':
+    unittest.main() 
