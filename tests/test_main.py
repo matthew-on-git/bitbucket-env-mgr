@@ -1,18 +1,18 @@
 """Unit tests for main function integration in manage_bitbucket_env.py."""
+# pylint: disable=unused-argument
+from manage_bitbucket_env import main
 import unittest
 from unittest.mock import patch, Mock
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from manage_bitbucket_env import main
 
 class TestMainFunction(unittest.TestCase):
     """Test main function integration."""
-    mock_logger = None
 
     def setUp(self):
         """Set up test fixtures."""
-        self.mock_logger = Mock()
+        self.mock_logger: Mock = Mock()
 
     @patch('manage_bitbucket_env.arg_parser')
     @patch('manage_bitbucket_env.load_dotenv')
@@ -29,10 +29,11 @@ class TestMainFunction(unittest.TestCase):
         mock_args.repo_slug = 'test-repo'
         mock_args.deployment_name = 'test-deployment'
         mock_arg_parser.return_value = mock_args
-        mock_env_get.side_effect = lambda x: {
+        env_dict = {
             'BITBUCKET_USERNAME': 'test_user',
             'BITBUCKET_APP_PASSWORD': 'test_password'
-        }.get(x)
+        }
+        mock_env_get.side_effect = env_dict.get
         mock_auth_instance = Mock()
         mock_auth.return_value = mock_auth_instance
         main(self.mock_logger)

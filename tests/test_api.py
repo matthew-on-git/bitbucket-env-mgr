@@ -1,28 +1,22 @@
 """Unit tests for Bitbucket API logic in manage_bitbucket_env.py."""
+from manage_bitbucket_env import get_environment_uuid, get_variables
 import unittest
 from unittest.mock import patch, Mock
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from manage_bitbucket_env import get_environment_uuid, get_variables
 
 class TestAPI(unittest.TestCase):
     """Test API-related functions."""
-    logger = None
-    auth = None
-    workspace = None
-    repo_slug = None
-    deployment_name = None
-    env_uuid = None
 
     def setUp(self):
         """Set up test fixtures."""
-        self.logger = Mock()
-        self.auth = Mock()
-        self.workspace = 'ws'
-        self.repo_slug = 'repo'
-        self.deployment_name = 'env'
-        self.env_uuid = 'uuid-123'
+        self.logger: Mock = Mock()
+        self.auth: Mock = Mock()
+        self.workspace: str = 'ws'
+        self.repo_slug: str = 'repo'
+        self.deployment_name: str = 'env'
+        self.env_uuid: str = 'uuid-123'
 
     @patch('manage_bitbucket_env.requests.get')
     def test_get_environment_uuid_found(self, mock_get):
