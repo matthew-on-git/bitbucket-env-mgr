@@ -1,13 +1,19 @@
 """Unit tests for Bitbucket API logic in manage_bitbucket_env.py."""
-from manage_bitbucket_env import get_environment_uuid, get_variables
 import unittest
 from unittest.mock import patch, Mock
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from typing import Optional
+
+from manage_bitbucket_env import get_environment_uuid, get_variables
 
 class TestAPI(unittest.TestCase):
     """Test API-related functions."""
+    # pylint: disable=attribute-defined-outside-init
+    logger: Optional[Mock] = None
+    auth: Optional[Mock] = None
+    workspace: Optional[str] = None
+    repo_slug: Optional[str] = None
+    deployment_name: Optional[str] = None
+    env_uuid: Optional[str] = None
 
     def setUp(self):
         """Set up test fixtures."""
@@ -65,4 +71,4 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(result_vars[0]["key"], "A")
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

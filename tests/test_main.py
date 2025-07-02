@@ -1,18 +1,19 @@
 """Unit tests for main function integration in manage_bitbucket_env.py."""
 # pylint: disable=unused-argument
-from manage_bitbucket_env import main
 import unittest
 from unittest.mock import patch, Mock
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from typing import Optional
+
+from manage_bitbucket_env import main
 
 class TestMainFunction(unittest.TestCase):
     """Test main function integration."""
+    # pylint: disable=attribute-defined-outside-init
+    mock_logger: Optional[Mock] = None
 
     def setUp(self):
         """Set up test fixtures."""
-        self.mock_logger: Mock = Mock()
+        self.mock_logger = Mock()
 
     @patch('manage_bitbucket_env.arg_parser')
     @patch('manage_bitbucket_env.load_dotenv')
@@ -59,4 +60,4 @@ class TestMainFunction(unittest.TestCase):
             main(self.mock_logger)
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

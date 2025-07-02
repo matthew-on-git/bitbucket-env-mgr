@@ -1,10 +1,9 @@
 """Unit tests for argument parsing in manage_bitbucket_env.py."""
-from manage_bitbucket_env import arg_parser
 import unittest
 from unittest.mock import patch
 import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from manage_bitbucket_env import arg_parser
 
 class TestArgParser(unittest.TestCase):
     """Test argument parsing functionality."""
@@ -40,4 +39,4 @@ class TestArgParser(unittest.TestCase):
                 arg_parser()
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

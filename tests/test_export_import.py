@@ -1,18 +1,25 @@
 """Unit tests for export/import logic in manage_bitbucket_env.py."""
 # pylint: disable=duplicate-code
-from manage_bitbucket_env import (
-    export_variables, export_all_variables, export_secure_keys, import_variables
-)
 import unittest
 from unittest.mock import patch, Mock
-import sys
 import os
 import tempfile
 import json
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from typing import Optional
+
+from manage_bitbucket_env import (
+    export_variables, export_all_variables, export_secure_keys, import_variables
+)
 
 class TestExportImport(unittest.TestCase):
     """Test export and import functionality."""
+    # pylint: disable=attribute-defined-outside-init
+    logger: Optional[Mock] = None
+    auth: Optional[Mock] = None
+    workspace: Optional[str] = None
+    repo_slug: Optional[str] = None
+    deployment_name: Optional[str] = None
+    env_uuid: Optional[str] = None
 
     def setUp(self):
         """Set up test fixtures."""
@@ -125,4 +132,4 @@ class TestExportImport(unittest.TestCase):
             os.unlink(fname)
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

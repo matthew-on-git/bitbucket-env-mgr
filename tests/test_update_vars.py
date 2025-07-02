@@ -1,14 +1,19 @@
 """Unit tests for update_vars logic in manage_bitbucket_env.py."""
 # pylint: disable=duplicate-code
-from manage_bitbucket_env import update_vars
 import unittest
 from unittest.mock import patch, Mock
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from typing import Optional
+
+from manage_bitbucket_env import update_vars
 
 class TestUpdateVars(unittest.TestCase):
     """Test variable update functionality."""
+    # pylint: disable=attribute-defined-outside-init
+    logger: Optional[Mock] = None
+    auth: Optional[Mock] = None
+    workspace: Optional[str] = None
+    repo_slug: Optional[str] = None
+    env_uuid: Optional[str] = None
 
     def setUp(self):
         """Set up test fixtures."""
@@ -49,4 +54,4 @@ class TestUpdateVars(unittest.TestCase):
         mock_post.assert_called_once()
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()
